@@ -1,0 +1,58 @@
+
+version: '3'
+
+services:
+
+    media:
+        image: zlmediakit/zlmediakit:master
+        container_name: wvp-pro-media
+        ports:
+            - "554:554"     
+            - "1935:1935"
+            - "8000:8000"
+            - "30000-30500:30000-30500"
+            - "30000-30500:30000-30500/udp"
+        volumes:
+            - ./zlmediakit_config.ini:/opt/media/conf/config.ini
+
+    cache:
+        image: redis:7.0-alpine
+        container_name: wvp-pro-cache
+        volumes:
+            - ./data/redis:/data
+
+    db:
+        image: mysql:8.0
+        container_name: wvp-pro-db
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+            - ./mysql_init.sql:/docker-entrypoint-initdb.d/mysql.sql
+        ports:
+            - "3306:3306"
+            - "33060:33060"
+
+    
+    serv:
+        image: wvp-pro:latest
+        container_name: wvp-pro-serv
+        env_file: 
+            - ./docker-compose.env
+        volumes:
+            - ./application.yml:/opt/wvp/application-docker.yml
+        ports:
+            - "5060:5060"
+            - "5060:5060/udp"
+            - "18080:18080"
+        links: 
+            - db
+            - cache
+            - media
+        depends_on: 
+            - db
+            - cache
+            - media
+
+
+

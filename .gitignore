@@ -27,3 +27,6 @@ hs_err_pid*
 /target/
 
 /src/main/resources/static/
+**/.DS_Store
+/deploy/test/data
+*.code-workspace
